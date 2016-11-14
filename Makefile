@@ -131,8 +131,10 @@ sync:
 	$(MAKE) fetch
 	git checkout $(GITFLOW_BR_MASTER)
 	git merge upstream/$(GITFLOW_BR_MASTER)
+	git push origin $(GITFLOW_BR_MASTER)
 	git checkout $(GITFLOW_BR_DEVELOP_UPSTREAM)
 	git merge upstream/$(GITFLOW_BR_DEVELOP_UPSTREAM)
+	git push origin $(GITFLOW_BR_DEVELOP_UPSTREAM)
 	git checkout $(GITFLOW_BR_DEVELOP)
 	git merge upstream/$(GITFLOW_BR_DEVELOP_UPSTREAM)
 
