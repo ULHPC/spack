@@ -1,4 +1,4 @@
-.. _basics_tutorial:
+.. _basics-tutorial:
 
 =========================================
 Basic Installation Tutorial

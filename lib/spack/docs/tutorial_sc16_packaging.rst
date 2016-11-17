@@ -1,4 +1,4 @@
-.. _package_tutorial:
+.. _packaging-tutorial:
 
 =========================
 Package Creation Tutorial
@@ -37,7 +37,7 @@ A few things before we get started:
   editor you like.
 - We'll be writting Python code as part of this tutorial.  You can find
   successive versions of the Python code in
-  ``$SPACK_ROOT/lib/spack/docs/packaging_tutorial``.
+  ``$SPACK_ROOT/lib/spack/docs/tutorial/examples``.
 
 -------------------------
 Creating the Package File
@@ -61,7 +61,7 @@ we run ``spack create`` on it:
 
 And Spack should spawn a text editor with this file:
 
-.. literalinclude:: packaging_tutorial/0.package.py
+.. literalinclude:: tutorial/examples/0.package.py
    :start-after: # flake8: noqa
    :language: python
 
@@ -122,10 +122,10 @@ Let's remove some of the ``TODO`` comments, and add links to the mpileaks
 homepage and document what mpileaks does.  I'm also going to cut out the
 Copyright clause at this point to keep this tutorial document shorter,
 but you shouldn't do that normally.  The results of these changes can be
-found in ``$SPACK_ROOT/lib/spack/docs/packaging_tutorial/1.package.py``
+found in ``$SPACK_ROOT/lib/spack/docs/tutorial/examples/1.package.py``
 and are below.  Make these changes to your ``package.py``:
 
-.. literalinclude:: packaging_tutorial/1.package.py
+.. literalinclude:: tutorial/examples/1.package.py
    :start-after: # flake8: noqa
    :language: python
 
@@ -174,9 +174,9 @@ Dependencies
 The mpileaks packages depends on three other package: ``MPI``,
 ``adept-utils``, and ``callpath``.  Let's add those via the
 ``depends_on`` command in our ``package.py`` (this version is in
-``$SPACK_ROOT/lib/spack/docs/packaging_tutorial/2.package.py``):
+``$SPACK_ROOT/lib/spack/docs/tutorial/examples/2.package.py``):
 
-.. literalinclude:: packaging_tutorial/2.package.py
+.. literalinclude:: tutorial/examples/2.package.py
    :start-after: # flake8: noqa
    :language: python
 
@@ -329,9 +329,9 @@ Specifying Configure Arguments
 
 Let's add the configure arguments to the mpileaks' ``package.py``.  This
 version can be found in
-``$SPACK_ROOT/lib/spack/docs/packaging_tutorial/3.package.py``:
+``$SPACK_ROOT/lib/spack/docs/tutorial/examples/3.package.py``:
 
-.. literalinclude:: packaging_tutorial/3.package.py
+.. literalinclude:: tutorial/examples/3.package.py
    :start-after: # flake8: noqa
    :language: python
 
@@ -382,9 +382,9 @@ that it walks.  Let's add a variant to allow users to set this when they
 build in Spack.
 
 To do this, we'll add a variant to our package, as per the following (see
-``$SPACK_ROOT/lib/spack/docs/packaging_tutorial/4.package.py``):
+``$SPACK_ROOT/lib/spack/docs/tutorial/examples/4.package.py``):
 
-.. literalinclude:: packaging_tutorial/4.package.py
+.. literalinclude:: tutorial/examples/4.package.py
    :start-after: # flake8: noqa
    :language: python
 

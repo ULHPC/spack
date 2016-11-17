@@ -1,4 +1,4 @@
-.. _module_tutorial:
+.. _modules-tutorial:
 
 =============================
 Module Configuration Tutorial
