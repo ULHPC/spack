@@ -35,6 +35,7 @@ class Hypre(Package):
     homepage = "http://computation.llnl.gov/project/linear_solvers/software.php"
     url      = "http://computation.llnl.gov/project/linear_solvers/download/hypre-2.10.0b.tar.gz"
 
+    version('develop', git='https://github.com/LLNL/hypre', tag='master')
     version('2.11.1', '3f02ef8fd679239a6723f60b7f796519')
     version('2.10.1', 'dc048c4cabb3cd549af72591474ad674')
     version('2.10.0b', '768be38793a35bb5d055905b271f5b8e')
@@ -45,6 +46,8 @@ class Hypre(Package):
     # SuperluDist have conflicting headers with those in Hypre
     variant('internal-superlu', default=True,
             description="Use internal Superlu routines")
+    variant('int64', default=False,
+            description="Use 64bit integers")
 
     depends_on("mpi")
     depends_on("blas")
@@ -66,6 +69,9 @@ class Hypre(Package):
             '--with-blas-libs=%s' % ' '.join(blas.names),
             '--with-blas-lib-dirs=%s' % ' '.join(blas.directories)
         ]
+
+        if '+int64' in self.spec:
+            configure_args.append('--enable-bigint')
 
         if '+shared' in self.spec:
             configure_args.append("--enable-shared")

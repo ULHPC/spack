@@ -51,17 +51,19 @@ There are two parts to the build environment:
 Skimming this module is a nice way to get acquainted with the types of
 calls you can make from within the install() function.
 """
-import os
-import sys
-import multiprocessing
-import traceback
 import inspect
+import multiprocessing
+import os
 import shutil
+import sys
+import traceback
 
+import llnl.util.lang as lang
 import llnl.util.tty as tty
+from llnl.util.filesystem import *
+
 import spack
 import spack.store
-from llnl.util.filesystem import *
 from spack.environment import EnvironmentModifications, validate
 from spack.util.environment import *
 from spack.util.executable import Executable, which
@@ -224,7 +226,7 @@ def set_compiler_environment_variables(pkg, env):
     for mod in compiler.modules:
         load_module(mod)
 
-    compiler.setup_custom_environment(env)
+    compiler.setup_custom_environment(pkg, env)
 
     return env
 
@@ -339,8 +341,8 @@ def set_build_environment_variables(pkg, env, dirty=False):
             if os.path.isdir(pcdir):
                 env.prepend_path('PKG_CONFIG_PATH', pcdir)
 
-    if pkg.spec.architecture.target.module_name:
-        load_module(pkg.spec.architecture.target.module_name)
+    if pkg.architecture.target.module_name:
+        load_module(pkg.architecture.target.module_name)
 
     return env
 
@@ -430,26 +432,23 @@ def get_rpaths(pkg):
     return rpaths
 
 
-def get_std_cmake_args(cmake_pkg):
-    # standard CMake arguments
-    ret = ['-DCMAKE_INSTALL_PREFIX=%s' % cmake_pkg.prefix,
-           '-DCMAKE_BUILD_TYPE=RelWithDebInfo',
-           '-DCMAKE_VERBOSE_MAKEFILE=ON']
-    if platform.mac_ver()[0]:
-        ret.append('-DCMAKE_FIND_FRAMEWORK=LAST')
+def get_std_cmake_args(pkg):
+    """Returns the list of standard arguments that would be used if this
+    package was a CMakePackage instance.
 
-    # Set up CMake rpath
-    ret.append('-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=FALSE')
-    ret.append('-DCMAKE_INSTALL_RPATH=%s' % ":".join(get_rpaths(cmake_pkg)))
+    :param pkg: pkg under consideration
 
-    return ret
+    :return: list of arguments for cmake
+    """
+    return spack.CMakePackage._std_args(pkg)
 
 
 def parent_class_modules(cls):
     """
     Get list of super class modules that are all descend from spack.Package
     """
-    if not issubclass(cls, spack.Package) or issubclass(spack.Package, cls):
+    if (not issubclass(cls, spack.package.Package) or
+        issubclass(spack.package.Package, cls)):
         return []
     result = []
     module = sys.modules.get(cls.__module__)
@@ -492,7 +491,7 @@ def setup_package(pkg, dirty=False):
 
     set_compiler_environment_variables(pkg, spack_env)
     set_build_environment_variables(pkg, spack_env, dirty)
-    pkg.spec.architecture.platform.setup_platform_environment(pkg, spack_env)
+    pkg.architecture.platform.setup_platform_environment(pkg, spack_env)
     load_external_modules(pkg)
     # traverse in postorder so package can use vars from its dependencies
     spec = pkg.spec
@@ -550,6 +549,11 @@ def fork(pkg, function, dirty=False):
             setup_package(pkg, dirty=dirty)
             function(input_stream)
             child_connection.send(None)
+        except StopIteration as e:
+            # StopIteration is used to stop installations
+            # before the final stage, mainly for debug purposes
+            tty.msg(e.message)
+            child_connection.send(None)
         except:
             # catch ANYTHING that goes wrong in the child process
             exc_type, exc, tb = sys.exc_info()
@@ -579,7 +583,7 @@ def fork(pkg, function, dirty=False):
     try:
         # Forward sys.stdin to be able to activate / deactivate
         # verbosity pressing a key at run-time
-        input_stream = os.fdopen(os.dup(sys.stdin.fileno()))
+        input_stream = lang.duplicate_stream(sys.stdin)
         p = multiprocessing.Process(
             target=child_execution,
             args=(child_connection, input_stream)
@@ -621,9 +625,9 @@ def get_package_context(traceback):
     for tb in stack:
         frame = tb.tb_frame
         if 'self' in frame.f_locals:
-            # Find the first proper subclass of spack.PackageBase.
+            # Find the first proper subclass of PackageBase.
             obj = frame.f_locals['self']
-            if isinstance(obj, spack.PackageBase):
+            if isinstance(obj, spack.package.PackageBase):
                 break
 
     # we found obj, the Package implementation we care about.

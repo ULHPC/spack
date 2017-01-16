@@ -24,6 +24,7 @@
 ##############################################################################
 from spack import *
 import glob
+import os
 
 
 class SuperluDist(Package):
@@ -32,6 +33,7 @@ class SuperluDist(Package):
     homepage = "http://crd-legacy.lbl.gov/~xiaoye/SuperLU/"
     url = "http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_dist_4.1.tar.gz"
 
+    version('develop', git='https://github.com/xiaoyeli/superlu_dist', tag='master')
     version('5.1.1', '12638c631733a27dcbd87110e9f9cb1e')
     version('5.1.0', '6bb86e630bd4bd8650243aed8fd92eb9')
     version('5.0.0', '2b53baf1b0ddbd9fcf724992577f0670')
@@ -40,6 +42,9 @@ class SuperluDist(Package):
     version('4.1', '4edee38cc29f687bd0c8eb361096a455')
     version('4.0', 'c0b98b611df227ae050bc1635c6940e0')
     version('3.3', 'f4805659157d93a962500902c219046b')
+
+    variant('int64', default=False,
+            description="Use 64bit integers")
 
     depends_on('mpi')
     depends_on('blas')
@@ -64,8 +69,10 @@ class SuperluDist(Package):
             'ARCHFLAGS    = cr',
             'RANLIB       = true',
             'CC           = {0}'.format(self.spec['mpi'].mpicc),
-            'CFLAGS       = -fPIC -std=c99 -O2 -I%s -I%s' % (
-                spec['parmetis'].prefix.include, spec['metis'].prefix.include),
+            'CFLAGS       = -fPIC -std=c99 -O2 -I%s -I%s %s' % (
+                spec['parmetis'].prefix.include,
+                spec['metis'].prefix.include,
+                '-D_LONGINT' if '+int64' in spec else ''),
             'NOOPTS       = -fPIC -std=c99',
             'FORTRAN      = {0}'.format(self.spec['mpi'].mpif77),
             'F90FLAGS     = -O2',
@@ -77,6 +84,7 @@ class SuperluDist(Package):
         with open('make.inc', 'w') as fh:
             fh.write('\n'.join(makefile_inc))
 
+        mkdirp(os.path.join(self.stage.source_path, 'lib'))
         make("lib", parallel=False)
 
         # FIXME:
