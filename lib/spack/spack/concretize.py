@@ -315,7 +315,7 @@ class DefaultConcretizer(object):
         def _proper_compiler_style(cspec, aspec):
             return spack.compilers.compilers_for_spec(cspec, arch_spec=aspec)
 
-        all_compilers = spack.compilers.all_compilers()
+        all_compilers = spack.compilers.all_compiler_specs()
 
         if (spec.compiler and
             spec.compiler.concrete and
@@ -473,8 +473,8 @@ class UnavailableCompilerVersionError(spack.error.SpackError):
 
     def __init__(self, compiler_spec, operating_system, target):
         super(UnavailableCompilerVersionError, self).__init__(
-            "No available compiler version matches '%s' on operating_system %s"
-            "for target %s"
+            "No available compiler version matches '%s' on operating_system "
+            "'%s' for target '%s'"
             % (compiler_spec, operating_system, target),
             "Run 'spack compilers' to see available compiler Options.")
 
